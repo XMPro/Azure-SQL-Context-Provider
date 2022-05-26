@@ -1,17 +1,17 @@
 # Azure-SQL-Context-Provider
 
 ## Prerequisites
-- Visual Studio (any version that supports .Net Core 2.1)
-- [XMPro IoT Framework NuGet package](https://www.nuget.org/packages/XMPro.IOT.Framework/3.0.2-beta)
-- Please see the [Building an Agent for XMPro IoT](https://docs.xmpro.com/lessons/writing-an-agent-for-xmpro-iot/) guide for a better understanding of how the XMPro IoT Framework works
+- Visual Studio
+- [XMPro IoT Framework NuGet package](https://www.nuget.org/packages/XMPro.IOT.Framework/)
+- Please see the [Manage Agents](https://documentation.xmpro.com/how-tos/manage-agents) guide for a better understanding of how the Agent Framework works
 
 ## Description
- The *Azure SQL Context Provider* allows the user to add context to a use case stream by bringing in reference/static data from a configured Azure SQL data source. It is used in conjunction with the *Join* transformation which allows two data sources to be joined together to form a new data source. This agent is a virtual agent; thus, not relying on a specific environment to function and does not require you to have SQL Server installed.
+ The *Azure SQL Context Provider* allows the user to add context to a use case stream by bringing in reference/static data from a configured Azure SQL data source. It is often used in conjunction with the *Join* transformation which allows two data sources to be joined together to form a new data source. This agent is a virtual agent; thus, not relying on a specific environment to function and does not require you to have SQL Server installed.
 
 ## How the code works
-All settings referred to in the code need to correspond with the settings defined in the template that has been created for the agent using the Stream Integration Manager. Refer to the [Stream Integration Manager](https://docs.xmpro.com/courses/packaging-an-agent-using-stream-integration-manager/) guide for instructions on how to define the settings in the template and package the agent after building the code. 
+All settings referred to in the code need to correspond with the settings defined in the template that has been created for the agent using the XMPro Package Manager. Refer to the [XMPro Package Manager](https://documentation.xmpro.com/agent/packaging-agents/) guide for instructions on how to define the settings in the template and package the agent after building the code. 
 
-After packaging the agent, you can upload it to XMPro IoT and start using it.
+After packaging the agent, you can upload it to the XMPro Data Stream Designer and start using it.
 
 ### Settings
 When a user needs to use the *Azure SQL Context Provider* agent, they need to provide the name of the SQL Server instance they want to connect to, along with a username and password that can be used. Retrieve these values from the configuration using the following code: 
@@ -40,13 +40,17 @@ private bool SQLUseSQLAuth
 private string SQLDatabase => this.config["SQLDatabase"];
 private string SQLTable => this.config["SQLTable"];
 ```
-### Configurations
+
+### Configuration
 In the *GetConfigurationTemplate* method, parse the JSON representation of the settings into the Settings object.
+
 ```csharp
 var settings = Settings.Parse(template);
 new Populator(parameters).Populate(settings);
 ```
+
 Next, create the correct control for each setting and set its value:
+
 ```csharp
 TextBox SQLServer = settings.Find("SQLServer") as TextBox;
 SQLServer.HelpText = string.Empty;
@@ -55,12 +59,15 @@ CheckBox SQLUseSQLAuth = settings.Find("SQLUseSQLAuth") as CheckBox;
 TextBox SQLPassword = settings.Find("SQLPassword") as TextBox;
 SQLPassword.Visible = SQLUseSQLAuth.Value;
 ```
+
 Each database needs to be listed; thus, letting the user choose a database to connect to. To do this, get all the tables available to choose from, using the SQL Server instance name, username and password as provided by the user.
+
 ```csharp
-IList<string> tables = SQLHelpers.GetTables(SQLServer, SQLUser, SQLUseSQLAuth, this.decrypt(SQLPassword.Value), SQLDatabase, out            errorMessage);
+IList<string> tables = SQLHelpers.GetTables(SQLServer, SQLUser, SQLUseSQLAuth, this.decrypt(SQLPassword.Value), SQLDatabase, out errorMessage);
 ```
 
 Create a drop down to list the tables in.
+
 ```csharp
 DropDown SQLTable = settings.Find("SQLTable") as DropDown;
 SQLTable.Options = tables.Select(i => new Option() { DisplayMemeber = i, ValueMemeber = i }).ToList();
@@ -100,7 +107,7 @@ If all of the values are provided, make sure that the table exists.
 var server = new TextBox() { Value = this.SQLServer };
 var errorMessage = "";
 
-IList<string> tables = SQLHelpers.GetTables(server, new TextBox() { Value = this.SQLUser }, new CheckBox() { Value =                        this.SQLUseSQLAuth }, this.SQLPassword, new DropDown() { Value = this.SQLDatabase }, out errorMessage);
+IList<string> tables = SQLHelpers.GetTables(server, new TextBox() { Value = this.SQLUser }, new CheckBox() { Value = this.SQLUseSQLAuth }, this.SQLPassword, new DropDown() { Value = this.SQLDatabase }, out errorMessage);
 
 if (string.IsNullOrWhiteSpace(errorMessage) == false)
 {
@@ -114,14 +121,17 @@ if (tables.Any(d => d == this.SQLTable) == false)
 
 ### Create
 Set the config variable to the configuration received in the *Create* method.
+
 ```csharp
 public void Create(Configuration configuration)
 {
     this.config = configuration;
 }
 ```
+
 ### Start
 Build a connection string and create a connection to the SQL Server instance.
+
 ```csharp
 public void Start()
 {
@@ -131,6 +141,7 @@ public void Start()
 
 ### Destroy
 Make sure you close the connection to the SQL Server instance.
+
 ```csharp
 public void Destroy()
 {
@@ -147,6 +158,7 @@ public void Destroy()
 
 ### Publishing Events
 Publish the events by implementing the *Poll* method and invoking the *OnPublish* event.
+
 ```csharp
 public void Poll()
 {
@@ -167,8 +179,10 @@ public void Poll()
     }
 }
 ```
+
 ### Decrypting Values
 Since this agent needs secure settings (*SQL Password*), the value will automatically be encrypted. Use the following code to decrypt the value.
+
 ```csharp
 var request = new OnDecryptRequestArgs(value);
 this.OnDecryptRequest?.Invoke(this, request);
