@@ -1,4 +1,4 @@
-# Azure-SQL-Context-Provider
+# Azure SQL Context Provider
 
 ## Prerequisites
 - Visual Studio
