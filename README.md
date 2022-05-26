@@ -9,7 +9,7 @@
  The *Azure SQL Context Provider* allows the user to add context to a use case stream by bringing in reference/static data from a configured Azure SQL data source. It is often used in conjunction with the *Join* transformation which allows two data sources to be joined together to form a new data source. This agent is a virtual agent; thus, not relying on a specific environment to function and does not require you to have SQL Server installed.
 
 ## How the code works
-All settings referred to in the code need to correspond with the settings defined in the template that has been created for the agent using the XMPro Package Manager. Refer to the [XMPro Package Manager](https://documentation.xmpro.com/agent/packaging-agents/){:target="_blank"} guide for instructions on how to define the settings in the template and package the agent after building the code. 
+All settings referred to in the code need to correspond with the settings defined in the template that has been created for the agent using the XMPro Package Manager. Refer to the [XMPro Package Manager](https://documentation.xmpro.com/agent/packaging-agents/) guide for instructions on how to define the settings in the template and package the agent after building the code. 
 
 After packaging the agent, you can upload it to the XMPro Data Stream Designer and start using it.
 
